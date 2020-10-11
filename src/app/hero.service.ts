@@ -3,7 +3,7 @@ import {HEROES} from "./mock-heroes";
 import {Hero} from "./hero";
 import {Observable, of} from "rxjs";
 import {MessageService} from "./message.service";
-import {HttpClient} from "@angular/common/http";
+import {HttpClient, HttpHeaders} from "@angular/common/http";
 import {catchError, tap} from "rxjs/operators";
 
 @Injectable({
@@ -12,6 +12,11 @@ import {catchError, tap} from "rxjs/operators";
 export class HeroService {
   // define the heroesUrl of the form :base/:collectionName
   private heroesUrl = 'api/heroes'; // URL to web api
+
+  //header in http save requests is in httpOptions
+  httpOptions = {
+    headers: new HttpHeaders({'Content-Type': 'application/json'})
+  };
 
   constructor(private messageService: MessageService, private http: HttpClient) { }
 
@@ -59,5 +64,12 @@ export class HeroService {
       // Let the app keep running by returning an empty result.
       return of(result as T);
     };
+  }
+
+  updateHero(hero: Hero): Observable<any>{
+    return this.http.put(this.heroesUrl, hero, this.httpOptions).pipe(
+      tap(_ => this.log(`update hero id=${hero.id}`)),
+      catchError(this.handleError<any>(`updateHero`))
+    );
   }
 }
